@@ -1,0 +1,7 @@
+test
+.*
+rollup.config.js
+coverage
+.nyc_output
+
+
