@@ -98,6 +98,7 @@ function importFromJsonString(idbDatabase, jsonString, cb) {
             }
           };
           request.onerror = (event) => {
+            // istanbul ignore next
             console.log(event);
           };
         });
@@ -149,6 +150,7 @@ function clearDatabase(idbDatabase, cb) {
   }
 }
 
+// istanbul ignore else -- Browser
 if (typeof module !== 'undefined' && module.exports) {
   // We are running on Node.js so need to export the module
   module.exports = {

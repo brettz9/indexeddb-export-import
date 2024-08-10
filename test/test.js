@@ -185,6 +185,35 @@ describe('IDBExportImport', function() {
           });
         });
   });
+
+  it('Should import and export the database with only empty keys', function(done) {
+    const db = new Dexie('myDB3', {indexedDB: fakeIndexedDB});
+    db.version(1).stores({
+      empty: 'id++',
+    });
+
+    db.open().catch(function(e) {
+      console.error('Could not connect. ' + e);
+    });
+
+    db.transaction('r',
+        db.empty,
+        () => {
+          const idbDB = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
+          IDBExportImport.clearDatabase(idbDB, function(err) {
+            assert.ifError(err);
+            console.log('Cleared the database');
+            IDBExportImport.importFromJsonString(idbDB, mock, function(err) {
+              assert.ifError(err);
+              if (!err) {
+                console.log('Imported data successfully');
+              }
+              done();
+            });
+          });
+        });
+  });
+
   it('Should import and export the database with equal keys', function(done) {
     const db = new Dexie('myDB2', {indexedDB: fakeIndexedDB});
     db.version(1).stores({
