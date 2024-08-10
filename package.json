@@ -1,5 +1,5 @@
 {
-  "name": "indexeddb-export-import",
+  "name": "idb-export-import",
   "version": "2.1.5",
   "description": "Export/import an IndexedDB database to/from Typeson JSON",
   "type": "module",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Polarisation/indexeddb-export-import.git"
+    "url": "git+https://github.com/brettz9/indexeddb-export-import.git"
   },
   "keywords": [
     "IndexedDB",
@@ -36,9 +36,9 @@
   "author": "Justin Emery",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Polarisation/indexeddb-export-import/issues"
+    "url": "https://github.com/brettz9/indexeddb-export-import/issues"
   },
-  "homepage": "https://github.com/Polarisation/indexeddb-export-import#readme",
+  "homepage": "https://github.com/brettz9/indexeddb-export-import#readme",
   "devDependencies": {
     "c8": "^10.1.2",
     "dexie": "^3.0.3",
