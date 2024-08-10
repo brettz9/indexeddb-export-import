@@ -9,21 +9,21 @@ You can use **indexeddb-export-import** in a Node.js environment imported as a m
 
 ## Usage
 
-You will need an open [IDBDatabase](https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase) connection. 
+You will need an open [IDBDatabase](https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase) connection.
 
 The following example exports a database, clears all object stores, then re-imports the database. It uses [Dexie.js](https://github.com/dfahlander/Dexie.js) to initiate the database, but this is not required.
 
 ```js
-    const Dexie = require('dexie');
-    const IDBExportImport = require('indexeddb-export-import');
-    
+    import Dexie from 'dexie';
+    import * as IDBExportImport from 'indexeddb-export-import';
+
     const db = new Dexie('MyDB');
     db.version(1).stores({
       things: 'id++, thing_name, thing_description',
     });
     db.open().then(function() {
       const idbDatabase = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
-    
+
       // export to JSON, clear database, and import from JSON
       IDBExportImport.exportToJsonString(idbDatabase, function(err, jsonString) {
         if (err) {

@@ -1,11 +1,12 @@
 /* eslint-disable max-len */
-const fakeIndexedDB = require('fake-indexeddb');
-const Dexie = require('dexie');
-const IDBExportImport = require('../index');
-const assert = require('assert');
+import {readFile} from 'fs/promises';
+import fakeIndexedDB from 'fake-indexeddb';
+import Dexie from 'dexie';
+import * as IDBExportImport from '../index.js';
+import assert from 'assert';
 
-const mock = JSON.stringify(require('./data/example.json'));
-const mock2 = JSON.stringify(require('./data/example2.json'));
+const mock = await readFile('./test/data/example.json', 'utf8');
+const mock2 = await readFile('./test/data/example2.json', 'utf8');
 
 /* eslint-env mocha */
 

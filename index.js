@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Export all data from an IndexedDB database
  * @param {IDBDatabase} idbDatabase - to export from
@@ -15,9 +13,10 @@ function exportToJsonString(idbDatabase, cb) {
     const objectStoreNames = Array.from(objectStoreNamesSet);
     const transaction = idbDatabase.transaction(
         objectStoreNames,
-        'readonly'
+        'readonly',
     );
-    transaction.onerror = (event) => cb(event, null);
+
+    transaction.onerror = /* c8 ignore next */ (event) => cb(event, null);
 
     objectStoreNames.forEach((storeName) => {
       const allObjects = [];
@@ -60,9 +59,10 @@ function importFromJsonString(idbDatabase, jsonString, cb) {
     const objectStoreNames = Array.from(objectStoreNamesSet);
     const transaction = idbDatabase.transaction(
         objectStoreNames,
-        'readwrite'
+        'readwrite',
     );
-    transaction.onerror = (event) => cb(event);
+
+    transaction.onerror = /* c8 ignore next */ (event) => cb(event);
 
     const importObject = JSON.parse(jsonString);
 
@@ -97,8 +97,9 @@ function importFromJsonString(idbDatabase, jsonString, cb) {
               }
             }
           };
-          request.onerror = (event) => {
-            // istanbul ignore next
+
+          request.onerror = /* c8 ignore next */ (event) => {
+            /* c8 ignore next */
             console.log(event);
           };
         });
@@ -133,9 +134,10 @@ function clearDatabase(idbDatabase, cb) {
     const objectStoreNames = Array.from(objectStoreNamesSet);
     const transaction = idbDatabase.transaction(
         objectStoreNames,
-        'readwrite'
+        'readwrite',
     );
-    transaction.onerror = (event) => cb(event);
+
+    transaction.onerror = /* c8 ignore next */ (event) => cb(event);
 
     let count = 0;
     objectStoreNames.forEach(function(storeName) {
@@ -150,12 +152,8 @@ function clearDatabase(idbDatabase, cb) {
   }
 }
 
-// istanbul ignore else -- Browser
-if (typeof module !== 'undefined' && module.exports) {
-  // We are running on Node.js so need to export the module
-  module.exports = {
-    exportToJsonString: exportToJsonString,
-    importFromJsonString: importFromJsonString,
-    clearDatabase: clearDatabase,
-  };
-}
+export {
+  exportToJsonString,
+  importFromJsonString,
+  clearDatabase,
+};
