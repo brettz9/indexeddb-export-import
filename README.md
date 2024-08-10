@@ -21,37 +21,41 @@ The following example exports a database, clears all object stores, then re-impo
     db.version(1).stores({
       things: 'id++, thing_name, thing_description',
     });
-    db.open().then(async function() {
-      const idbDatabase = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
 
-      // export to JSON, clear database, and import from JSON
+    try {
+      await db.open();
+    } catch (err) {
+      console.error('Could not connect. ' + e);
+      return;
+    }
+
+    const idbDatabase = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
+
+    // export to JSON, clear database, and import from JSON
+    let err;
+    try {
+      jsonString = await IDBExportImport.exportToJsonString(idbDatabase);
+    } catch (error) {
+      err = error;
+    }
+    if (err) {
+      console.error(err);
+    } else {
+      console.log('Exported as JSON: ' + jsonString);
       let err;
       try {
-        jsonString = await IDBExportImport.exportToJsonString(idbDatabase);
+        await IDBExportImport.clearDatabase(idbDatabase);
       } catch (error) {
         err = error;
       }
-      if (err) {
-        console.error(err);
-      } else {
-        console.log('Exported as JSON: ' + jsonString);
-        let err;
+      if (!err) { // cleared data successfully
         try {
-          await IDBExportImport.clearDatabase(idbDatabase);
-        } catch (error) {
-          err = error;
-        }
-        if (!err) { // cleared data successfully
-          try {
-            await IDBExportImport.importFromJsonString(idbDatabase, jsonString);
-            console.log('Imported data successfully');
-          } catch (err) {
-          }
+          await IDBExportImport.importFromJsonString(idbDatabase, jsonString);
+          console.log('Imported data successfully');
+        } catch (err) {
         }
       }
-    }).catch(function(e) {
-      console.error('Could not connect. ' + e);
-    });
+    }
 ```
 
 ## API
