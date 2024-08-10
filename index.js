@@ -1,3 +1,9 @@
+import {
+  Typeson, structuredCloningThrowing,
+} from 'typeson-registry';
+
+const typeson = new Typeson().register(structuredCloningThrowing);
+
 /**
  * Export all data from an IndexedDB database
  * @param {IDBDatabase} idbDatabase - to export from
@@ -8,7 +14,7 @@ function exportToJsonString(idbDatabase, cb) {
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
   const size = objectStoreNamesSet.size;
   if (size === 0) {
-    cb(null, JSON.stringify(exportObject));
+    cb(null, typeson.stringify(exportObject));
   } else {
     const objectStoreNames = Array.from(objectStoreNamesSet);
     const transaction = idbDatabase.transaction(
@@ -31,7 +37,7 @@ function exportToJsonString(idbDatabase, cb) {
             objectStoreNames.length ===
             Object.keys(exportObject).length
           ) {
-            cb(null, JSON.stringify(exportObject));
+            cb(null, typeson.stringify(exportObject));
           }
         }
       };
@@ -64,7 +70,7 @@ function importFromJsonString(idbDatabase, jsonString, cb) {
 
     transaction.onerror = /* c8 ignore next */ (event) => cb(event);
 
-    const importObject = JSON.parse(jsonString);
+    const importObject = typeson.parse(jsonString);
 
     // Delete keys present in JSON that are not present in database
     Object.keys(importObject).forEach((storeName)=> {

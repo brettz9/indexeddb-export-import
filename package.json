@@ -14,7 +14,10 @@
     "lint": "eslint . --ext .js"
   },
   "c8": {
-    "reporter": ["lcov", "text"]
+    "reporter": [
+      "lcov",
+      "text"
+    ]
   },
   "repository": {
     "type": "git",
@@ -47,5 +50,8 @@
   },
   "engines": {
     "node": ">=12"
+  },
+  "dependencies": {
+    "typeson-registry": "^11.0.0"
   }
 }

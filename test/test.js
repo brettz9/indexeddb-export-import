@@ -34,7 +34,7 @@ describe('IDBExportImport', function() {
         const idbDB = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
         IDBExportImport.exportToJsonString(idbDB, function(err, jsonString) {
           assert.ifError(err);
-          assert.equal(jsonString, '{"things":[]}');
+          assert.equal(jsonString, '{"things":[],"$types":{"things":"arrayNonindexKeys"}}');
           done();
         });
       }).catch(function(e) {
@@ -63,7 +63,8 @@ describe('IDBExportImport', function() {
         console.log('Exported as JSON: ' + jsonString);
         assert.equal(jsonString, '{"things":[' +
         '{"thing_name":"First thing","thing_description":"This is the first thing","id":1},' +
-          '{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]}');
+          '{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]' +
+          ',"$types":{"things":"arrayNonindexKeys"}}');
 
         IDBExportImport.clearDatabase(idbDB, function(err) {
           assert.ifError(err);
@@ -78,7 +79,8 @@ describe('IDBExportImport', function() {
               console.log('Exported as JSON: ' + jsonString);
               assert.equal(jsonString, '{"things":[' +
                '{"thing_name":"First thing","thing_description":"This is the first thing","id":1}' +
-                ',{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]}');
+                ',{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]' +
+                ',"$types":{"things":"arrayNonindexKeys"}}');
 
               done();
             });
@@ -239,7 +241,9 @@ describe('IDBExportImport', function() {
               IDBExportImport.exportToJsonString(idbDB, function(err, jsonString) {
                 assert.ifError(err);
                 console.log('Exported as JSON: ' + jsonString);
-                assert.equal(jsonString, '{"foo":[{"bar":1}],"test":[{"foo":"value"}]}');
+                assert.equal(jsonString, '{"foo":[{"bar":1}],"test":[{"foo":"value"}]' +
+                    ',"$types":{"foo":"arrayNonindexKeys","test":"arrayNonindexKeys"}}',
+                );
                 done();
               });
             });
