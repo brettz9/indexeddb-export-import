@@ -55,7 +55,7 @@ describe('IDBExportImport', function() {
         err = error;
       }
       assert.ifError(err);
-      assert.equal(jsonString, '{"things":[],"$types":{"things":"arrayNonindexKeys"}}');
+      assert.equal(jsonString, '{"things":[]}');
     });
   });
 
@@ -95,8 +95,7 @@ describe('IDBExportImport', function() {
     console.log('Exported as JSON: ' + jsonString);
     assert.equal(jsonString, '{"things":[' +
     '{"thing_name":"First thing","thing_description":"This is the first thing","id":1},' +
-      '{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]' +
-      ',"$types":{"things":"arrayNonindexKeys"}}');
+      '{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]}');
 
     try {
       await IDBExportImport.clearDatabase(idbDB);
@@ -123,8 +122,7 @@ describe('IDBExportImport', function() {
     console.log('Exported as JSON: ' + jsonString);
     assert.equal(jsonString, '{"things":[' +
       '{"thing_name":"First thing","thing_description":"This is the first thing","id":1}' +
-      ',{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]' +
-      ',"$types":{"things":"arrayNonindexKeys"}}');
+      ',{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]}');
   });
   it('Should ignore keys for stores that do not exist when importing', async function() {
     const db = new Dexie('MyDB', {indexedDB: fakeIndexedDB});
@@ -315,7 +313,7 @@ describe('IDBExportImport', function() {
   it('Should import and export the database with equal keys', async function() {
     const db = new Dexie('myDB2', {indexedDB: fakeIndexedDB});
     db.version(1).stores({
-      foo: 'bar',
+      foo: 'id++',
       test: 'foo',
     });
 
@@ -357,8 +355,8 @@ describe('IDBExportImport', function() {
             }
             assert.ifError(err);
             console.log('Exported as JSON: ' + jsonString);
-            assert.equal(jsonString, '{"foo":[{"bar":1}],"test":[{"foo":"value"}]' +
-                ',"$types":{"foo":"arrayNonindexKeys","test":"arrayNonindexKeys"}}',
+            assert.equal(jsonString, '{"foo":[{"a":1723302865116,"id":1,' +
+                '"$types":{"a":"date"}}],"test":[{"foo":"value"}]}',
             );
             resolve();
           });

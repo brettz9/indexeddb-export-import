@@ -13,7 +13,7 @@ async function exportToJsonString(idbDatabase) {
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
   const size = objectStoreNamesSet.size;
   if (size === 0) {
-    return typeson.stringify(exportObject);
+    return JSON.stringify(exportObject);
   }
   const objectStoreNames = Array.from(objectStoreNamesSet);
 
@@ -30,7 +30,7 @@ async function exportToJsonString(idbDatabase) {
       transaction.objectStore(storeName).openCursor().onsuccess = (event) => {
         const cursor = event.target.result;
         if (cursor) {
-          allObjects.push(cursor.value);
+          allObjects.push(typeson.encapsulate(cursor.value));
           cursor.continue();
         } else {
           exportObject[storeName] = allObjects;
@@ -38,7 +38,7 @@ async function exportToJsonString(idbDatabase) {
             objectStoreNames.length ===
             Object.keys(exportObject).length
           ) {
-            resolve(typeson.stringify(exportObject));
+            resolve(JSON.stringify(exportObject));
           }
         }
       };
@@ -72,7 +72,7 @@ async function importFromJsonString(idbDatabase, jsonString) {
 
     transaction.onerror = /* c8 ignore next */ (event) => reject(event);
 
-    const importObject = typeson.parse(jsonString);
+    const importObject = JSON.parse(jsonString);
 
     // Delete keys present in JSON that are not present in database
     Object.keys(importObject).forEach((storeName)=> {
@@ -94,7 +94,8 @@ async function importFromJsonString(idbDatabase, jsonString) {
 
       if (importObject[storeName] && aux.length > 0) {
         aux.forEach((toAdd) => {
-          const request = transaction.objectStore(storeName).add(toAdd);
+          const typesonAdd = typeson.revive(toAdd);
+          const request = transaction.objectStore(storeName).add(typesonAdd);
           request.onsuccess = () => {
             count++;
             if (count === importObject[storeName].length) {
