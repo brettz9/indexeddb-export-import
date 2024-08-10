@@ -21,26 +21,34 @@ The following example exports a database, clears all object stores, then re-impo
     db.version(1).stores({
       things: 'id++, thing_name, thing_description',
     });
-    db.open().then(function() {
+    db.open().then(async function() {
       const idbDatabase = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
 
       // export to JSON, clear database, and import from JSON
-      IDBExportImport.exportToJsonString(idbDatabase, function(err, jsonString) {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log('Exported as JSON: ' + jsonString);
-          IDBExportImport.clearDatabase(idbDatabase, function(err) {
-            if (!err) { // cleared data successfully
-              IDBExportImport.importFromJsonString(idbDatabase, jsonString, function(err) {
-                if (!err) {
-                  console.log('Imported data successfully');
-                }
-              });
-            }
-          });
+      let err;
+      try {
+        jsonString = await IDBExportImport.exportToJsonString(idbDatabase);
+      } catch (error) {
+        err = error;
+      }
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('Exported as JSON: ' + jsonString);
+        let err;
+        try {
+          await IDBExportImport.clearDatabase(idbDatabase);
+        } catch (error) {
+          err = error;
         }
-      });
+        if (!err) { // cleared data successfully
+          try {
+            await IDBExportImport.importFromJsonString(idbDatabase, jsonString);
+            console.log('Imported data successfully');
+          } catch (err) {
+          }
+        }
+      }
     }).catch(function(e) {
       console.error('Could not connect. ' + e);
     });
@@ -69,13 +77,12 @@ Import data from JSON into an IndexedDB database. This does not delete any exist
 
 <a name="clearDatabase"></a>
 
-### clearDatabase(idbDatabase, cb)
+### clearDatabase(idbDatabase)
 Clears a database of all data
 
 | Param | Type | Description |
 | --- | --- | --- |
 | idbDatabase | <code>IDBDatabase</code> |  |
-| cb | <code>function</code> | callback with signature (error), where error is null on success |
 
 
 ## Installation

@@ -7,22 +7,23 @@ const typeson = new Typeson().register(structuredCloningThrowing);
 /**
  * Export all data from an IndexedDB database
  * @param {IDBDatabase} idbDatabase - to export from
- * @param {function(Object?, string?)} cb - callback with signature (error, jsonString)
  */
-function exportToJsonString(idbDatabase, cb) {
+async function exportToJsonString(idbDatabase) {
   const exportObject = {};
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
   const size = objectStoreNamesSet.size;
   if (size === 0) {
-    cb(null, typeson.stringify(exportObject));
-  } else {
-    const objectStoreNames = Array.from(objectStoreNamesSet);
+    return typeson.stringify(exportObject);
+  }
+  const objectStoreNames = Array.from(objectStoreNamesSet);
+
+  return new Promise((resolve, reject) => {
     const transaction = idbDatabase.transaction(
         objectStoreNames,
         'readonly',
     );
 
-    transaction.onerror = /* c8 ignore next */ (event) => cb(event, null);
+    transaction.onerror = /* c8 ignore next */ (event) => reject(event);
 
     objectStoreNames.forEach((storeName) => {
       const allObjects = [];
@@ -37,12 +38,12 @@ function exportToJsonString(idbDatabase, cb) {
             objectStoreNames.length ===
             Object.keys(exportObject).length
           ) {
-            cb(null, typeson.stringify(exportObject));
+            resolve(typeson.stringify(exportObject));
           }
         }
       };
     });
-  }
+  });
 }
 
 /**
@@ -53,22 +54,23 @@ function exportToJsonString(idbDatabase, cb) {
  *
  * @param {IDBDatabase} idbDatabase - to import into
  * @param {string} jsonString - data to import, one key per object store
- * @param {function(Object)} cb - callback with signature (error), where error is null on success
- * @return {void}
+ * @return {Promise<void>}
  */
-function importFromJsonString(idbDatabase, jsonString, cb) {
+async function importFromJsonString(idbDatabase, jsonString) {
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
   const size = objectStoreNamesSet.size;
   if (size === 0) {
-    cb(null);
-  } else {
-    const objectStoreNames = Array.from(objectStoreNamesSet);
+    return;
+  }
+  const objectStoreNames = Array.from(objectStoreNamesSet);
+
+  return new Promise((resolve, reject) => {
     const transaction = idbDatabase.transaction(
         objectStoreNames,
         'readwrite',
     );
 
-    transaction.onerror = /* c8 ignore next */ (event) => cb(event);
+    transaction.onerror = /* c8 ignore next */ (event) => reject(event);
 
     const importObject = typeson.parse(jsonString);
 
@@ -81,13 +83,14 @@ function importFromJsonString(idbDatabase, jsonString, cb) {
 
     if (Object.keys(importObject).length === 0) {
       // no object stores exist to import for
-      cb(null);
+      resolve();
+      return;
     }
 
-    objectStoreNames.forEach((storeName) => {
+    objectStoreNames.some((storeName) => {
       let count = 0;
 
-      const aux = Array.from(importObject[storeName] || []);
+      const aux = Array.from(importObject[storeName] || /* c8 ignore next */ []);
 
       if (importObject[storeName] && aux.length > 0) {
         aux.forEach((toAdd) => {
@@ -99,7 +102,7 @@ function importFromJsonString(idbDatabase, jsonString, cb) {
               delete importObject[storeName];
               if (Object.keys(importObject).length === 0) {
                 // added all object stores
-                cb(null);
+                resolve();
               }
             }
           };
@@ -114,12 +117,13 @@ function importFromJsonString(idbDatabase, jsonString, cb) {
           delete importObject[storeName];
           if (Object.keys(importObject).length === 0) {
             // added all object stores
-            cb(null);
+            resolve();
+            return true;
           }
         }
       }
     });
-  }
+  });
 }
 
 /**
@@ -128,22 +132,22 @@ function importFromJsonString(idbDatabase, jsonString, cb) {
  * The object stores will still exist but will be empty.
  *
  * @param {IDBDatabase} idbDatabase - to delete all data from
- * @param {function(Object)} cb - callback with signature (error), where error is null on success
- * @return {void}
+ * @return {Promise<void>}
  */
-function clearDatabase(idbDatabase, cb) {
+async function clearDatabase(idbDatabase) {
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
   const size = objectStoreNamesSet.size;
   if (size === 0) {
-    cb(null);
-  } else {
-    const objectStoreNames = Array.from(objectStoreNamesSet);
+    return;
+  }
+  const objectStoreNames = Array.from(objectStoreNamesSet);
+
+  return new Promise((resolve, reject) => {
     const transaction = idbDatabase.transaction(
         objectStoreNames,
         'readwrite',
     );
-
-    transaction.onerror = /* c8 ignore next */ (event) => cb(event);
+    transaction.onerror = /* c8 ignore next */ (event) => reject(event);
 
     let count = 0;
     objectStoreNames.forEach(function(storeName) {
@@ -151,11 +155,11 @@ function clearDatabase(idbDatabase, cb) {
         count++;
         if (count === size) {
           // cleared all object stores
-          cb(null);
+          resolve();
         }
       };
     });
-  }
+  });
 }
 
 export {
