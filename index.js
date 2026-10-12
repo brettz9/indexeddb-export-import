@@ -1,30 +1,34 @@
 import {
-  Typeson, structuredCloningThrowing,
+  Typeson, structuredCloningThrowing
 } from 'typeson-registry';
 
 const typeson = new Typeson().register(structuredCloningThrowing);
 
 /**
- * Export all data from an IndexedDB database
+ * Export all data from an IndexedDB database.
  * @param {IDBDatabase} idbDatabase - to export from
+ * @returns {Promise<string>}
  */
-async function exportToJsonString(idbDatabase) {
+async function exportToJsonString (idbDatabase) {
   /** @type {Record<string, unknown[]>} */
   const exportObject = {};
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
-  const size = objectStoreNamesSet.size;
+  const {size} = objectStoreNamesSet;
   if (size === 0) {
-    return JSON.stringify(exportObject);
+    return await JSON.stringify(exportObject);
   }
-  const objectStoreNames = Array.from(objectStoreNamesSet);
+  const objectStoreNames = [...objectStoreNamesSet];
 
+  // eslint-disable-next-line promise/avoid-new -- Own API
   return new Promise((resolve, reject) => {
     const transaction = idbDatabase.transaction(
-        objectStoreNames,
-        'readonly',
+      objectStoreNames,
+      'readonly'
     );
 
-    transaction.onerror = /* c8 ignore next */ (event) => reject(event);
+    transaction.onerror = /* c8 ignore next -- Simulating? */ (
+      event
+    ) => reject(event);
 
     objectStoreNames.forEach((storeName) => {
       /** @type {unknown[]} */
@@ -58,20 +62,21 @@ async function exportToJsonString(idbDatabase) {
  *
  * @param {IDBDatabase} idbDatabase - to import into
  * @param {string} jsonString - data to import, one key per object store
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
-async function importFromJsonString(idbDatabase, jsonString) {
+async function importFromJsonString (idbDatabase, jsonString) {
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
-  const size = objectStoreNamesSet.size;
+  const {size} = objectStoreNamesSet;
   if (size === 0) {
-    return;
+    return await undefined;
   }
-  const objectStoreNames = Array.from(objectStoreNamesSet);
+  const objectStoreNames = [...objectStoreNamesSet];
 
+  // eslint-disable-next-line promise/avoid-new -- Own API
   return new Promise((resolve, reject) => {
     const transaction = idbDatabase.transaction(
-        objectStoreNames,
-        'readwrite',
+      objectStoreNames,
+      'readwrite'
     );
 
     transaction.onerror = /* c8 ignore next */ (event) => reject(event);
@@ -79,7 +84,7 @@ async function importFromJsonString(idbDatabase, jsonString) {
     const importObject = JSON.parse(jsonString);
 
     // Delete keys present in JSON that are not present in database
-    Object.keys(importObject).forEach((storeName)=> {
+    Object.keys(importObject).forEach((storeName) => {
       if (!objectStoreNames.includes(storeName)) {
         delete importObject[storeName];
       }
@@ -94,7 +99,7 @@ async function importFromJsonString(idbDatabase, jsonString) {
     objectStoreNames.some((storeName) => {
       let count = 0;
 
-      const aux = Array.from(importObject[storeName] || /* c8 ignore next */ []);
+      const aux = [...importObject[storeName] || /* c8 ignore next */ []];
 
       if (importObject[storeName] && aux.length > 0) {
         aux.forEach((toAdd) => {
@@ -102,13 +107,15 @@ async function importFromJsonString(idbDatabase, jsonString) {
           const request = transaction.objectStore(storeName).add(typesonAdd);
           request.onsuccess = () => {
             count++;
-            if (count === importObject[storeName].length) {
-              // added all objects for this store
-              delete importObject[storeName];
-              if (Object.keys(importObject).length === 0) {
-                // added all object stores
-                resolve();
-              }
+            if (count !== importObject[storeName].length) {
+              return;
+            }
+
+            // added all objects for this store
+            delete importObject[storeName];
+            if (Object.keys(importObject).length === 0) {
+              // added all object stores
+              resolve();
             }
           };
 
@@ -117,14 +124,12 @@ async function importFromJsonString(idbDatabase, jsonString) {
             console.log(event);
           };
         });
-      } else {
-        if (importObject[storeName]) {
-          delete importObject[storeName];
-          if (Object.keys(importObject).length === 0) {
-            // added all object stores
-            resolve();
-            return true;
-          }
+      } else if (importObject[storeName]) {
+        delete importObject[storeName];
+        if (Object.keys(importObject).length === 0) {
+          // added all object stores
+          resolve();
+          return true;
         }
       }
     });
@@ -137,25 +142,26 @@ async function importFromJsonString(idbDatabase, jsonString) {
  * The object stores will still exist but will be empty.
  *
  * @param {IDBDatabase} idbDatabase - to delete all data from
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
-async function clearDatabase(idbDatabase) {
+async function clearDatabase (idbDatabase) {
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
-  const size = objectStoreNamesSet.size;
+  const {size} = objectStoreNamesSet;
   if (size === 0) {
-    return;
+    return await undefined;
   }
-  const objectStoreNames = Array.from(objectStoreNamesSet);
+  const objectStoreNames = [...objectStoreNamesSet];
 
+  // eslint-disable-next-line promise/avoid-new -- Own API
   return new Promise((resolve, reject) => {
     const transaction = idbDatabase.transaction(
-        objectStoreNames,
-        'readwrite',
+      objectStoreNames,
+      'readwrite'
     );
     transaction.onerror = /* c8 ignore next */ (event) => reject(event);
 
     let count = 0;
-    objectStoreNames.forEach(function(storeName) {
+    objectStoreNames.forEach(function (storeName) {
       transaction.objectStore(storeName).clear().onsuccess = () => {
         count++;
         if (count === size) {
@@ -170,5 +176,5 @@ async function clearDatabase(idbDatabase) {
 export {
   exportToJsonString,
   importFromJsonString,
-  clearDatabase,
+  clearDatabase
 };

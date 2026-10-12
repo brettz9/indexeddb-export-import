@@ -17,6 +17,11 @@
     "lint": "eslint . --ext .js"
   },
   "c8": {
+    "checkCoverage": true,
+    "lines": 100,
+    "branches": 100,
+    "statements": 100,
+    "functions": 100,
     "reporter": [
       "lcov",
       "text"

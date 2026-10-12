@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import assert from 'node:assert';
 import {readFile} from 'node:fs/promises';
 import fakeIndexedDB from 'fake-indexeddb';
@@ -10,9 +10,9 @@ const mock2 = await readFile('./test/data/example2.json', 'utf8');
 
 /* eslint-env mocha */
 
-describe('IDBExportImport', function() {
-  describe('#exportToJsonString()', function() {
-    it('DB with no object stores should export an empty string', async function() {
+describe('IDBExportImport', function () {
+  describe('#exportToJsonString()', function () {
+    it('DB with no object stores should export an empty string', async function () {
       const db = new Dexie('NoObjectStoresDB', {indexedDB: fakeIndexedDB});
       db.version(1).stores({}); // nothing
       try {
@@ -35,7 +35,7 @@ describe('IDBExportImport', function() {
       assert.equal(jsonString, '{}');
     });
 
-    it('DB with empty object stores should export an empty string', async function() {
+    it('DB with empty object stores should export an empty string', async function () {
       const db = new Dexie('EmptyObjectStoresDB', {indexedDB: fakeIndexedDB});
       db.version(1).stores({things: 'id++, thing_name, thing_description'}); // nothing
       let err;
@@ -59,10 +59,10 @@ describe('IDBExportImport', function() {
     });
   });
 
-  it('Should export, clear, and import the database', async function() {
+  it('Should export, clear, and import the database', async function () {
     const db = new Dexie('MyDB', {indexedDB: fakeIndexedDB});
     db.version(1).stores({
-      things: 'id++, thing_name, thing_description',
+      things: 'id++, thing_name, thing_description'
     });
 
     let err;
@@ -124,10 +124,10 @@ describe('IDBExportImport', function() {
       '{"thing_name":"First thing","thing_description":"This is the first thing","id":1}' +
       ',{"thing_name":"Second thing","thing_description":"This is the second thing","id":2}]}');
   });
-  it('Should ignore keys for stores that do not exist when importing', async function() {
+  it('Should ignore keys for stores that do not exist when importing', async function () {
     const db = new Dexie('MyDB', {indexedDB: fakeIndexedDB});
     db.version(1).stores({
-      things: 'id++, thing_name, thing_description',
+      things: 'id++, thing_name, thing_description'
     });
     try {
       await db.open();
@@ -172,10 +172,10 @@ describe('IDBExportImport', function() {
     assert.ifError(err);
     console.log('Imported data successfully');
   });
-  it('Should ignore stores that are not present when importing', async function() {
+  it('Should ignore stores that are not present when importing', async function () {
     const db = new Dexie('MyDB', {indexedDB: fakeIndexedDB});
     db.version(1).stores({
-      things: 'id++, thing_name, thing_description',
+      things: 'id++, thing_name, thing_description'
     });
     let err;
     try {
@@ -219,13 +219,13 @@ describe('IDBExportImport', function() {
     assert.ifError(err);
     console.log('Imported data successfully');
   });
-  it('Should import and export the database with empty keys', async function() {
+  it('Should import and export the database with empty keys', async function () {
     const db = new Dexie('myDB', {indexedDB: fakeIndexedDB});
     db.version(1).stores({
       colors: 'id++, name, info',
       shapes: 'id++, name',
       color_shape: '[shape+color]',
-      empty: 'id++',
+      empty: 'id++'
     });
 
     let err;
@@ -239,39 +239,39 @@ describe('IDBExportImport', function() {
 
     return new Promise((resolve, reject) => {
       db.transaction('r',
-          db.colors,
-          db.shapes,
-          db.color_shape,
-          db.empty,
-          async () => {
-            const idbDB = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
-            let err;
-            try {
-              await IDBExportImport.clearDatabase(idbDB);
-            } catch (error) {
-              err = error;
-            }
-            assert.ifError(err);
-            console.log('Cleared the database');
-            try {
-              await IDBExportImport.importFromJsonString(idbDB, mock);
-            } catch (error) {
-              err = error;
-            }
-            assert.ifError(err);
-            if (!err) {
-              console.log('Imported data successfully');
-            }
-            resolve();
-          });
+        db.colors,
+        db.shapes,
+        db.color_shape,
+        db.empty,
+        async () => {
+          const idbDB = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
+          let err;
+          try {
+            await IDBExportImport.clearDatabase(idbDB);
+          } catch (error) {
+            err = error;
+          }
+          assert.ifError(err);
+          console.log('Cleared the database');
+          try {
+            await IDBExportImport.importFromJsonString(idbDB, mock);
+          } catch (error) {
+            err = error;
+          }
+          assert.ifError(err);
+          if (!err) {
+            console.log('Imported data successfully');
+          }
+          resolve();
+        });
     });
   });
 
-  it('Should import and export the database with only empty keys', async function() {
+  it('Should import and export the database with only empty keys', async function () {
     const db = new Dexie('myDB3', {indexedDB: fakeIndexedDB});
     db.version(1).stores({
       empty: 'id++',
-      unused: 'id++',
+      unused: 'id++'
     });
 
     let err;
@@ -285,36 +285,36 @@ describe('IDBExportImport', function() {
 
     return new Promise((resolve, reject) => {
       db.transaction('r',
-          db.empty,
-          async () => {
-            const idbDB = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
-            let err;
-            try {
-              await IDBExportImport.clearDatabase(idbDB);
-            } catch (error) {
-              err = error;
-            }
-            assert.ifError(err);
-            console.log('Cleared the database');
-            try {
-              await IDBExportImport.importFromJsonString(idbDB, mock);
-            } catch (error) {
-              err = error;
-            }
-            assert.ifError(err);
-            if (!err) {
-              console.log('Imported data successfully');
-            }
-            resolve();
-          });
+        db.empty,
+        async () => {
+          const idbDB = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
+          let err;
+          try {
+            await IDBExportImport.clearDatabase(idbDB);
+          } catch (error) {
+            err = error;
+          }
+          assert.ifError(err);
+          console.log('Cleared the database');
+          try {
+            await IDBExportImport.importFromJsonString(idbDB, mock);
+          } catch (error) {
+            err = error;
+          }
+          assert.ifError(err);
+          if (!err) {
+            console.log('Imported data successfully');
+          }
+          resolve();
+        });
     });
   });
 
-  it('Should import and export the database with equal keys', async function() {
+  it('Should import and export the database with equal keys', async function () {
     const db = new Dexie('myDB2', {indexedDB: fakeIndexedDB});
     db.version(1).stores({
       foo: 'id++',
-      test: 'foo',
+      test: 'foo'
     });
 
     let err;
@@ -328,41 +328,40 @@ describe('IDBExportImport', function() {
 
     return new Promise((resolve, reject) => {
       db.transaction('r',
-          db.foo,
-          db.test,
-          async () => {
-            const idbDB = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
-            let err;
-            try {
-              await IDBExportImport.clearDatabase(idbDB);
-            } catch (error) {
-              err = error;
-            }
-            assert.ifError(err);
-            console.log('Cleared the database');
-            try {
-              await IDBExportImport.importFromJsonString(idbDB, mock2);
-            } catch (error) {
-              err = error;
-            }
-            assert.ifError(err);
-            console.log('Imported data successfully');
-            let jsonString;
-            try {
-              jsonString = await IDBExportImport.exportToJsonString(idbDB);
-            } catch (error) {
-              err = error;
-            }
-            assert.ifError(err);
-            console.log('Exported as JSON: ' + jsonString);
-            assert.equal(jsonString, '{"foo":[{"a":1723302865116,"id":1,' +
-                '"$types":{"a":"date"}}],"test":[{"foo":"value"}]}',
-            );
-            resolve();
-          });
+        db.foo,
+        db.test,
+        async () => {
+          const idbDB = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
+          let err;
+          try {
+            await IDBExportImport.clearDatabase(idbDB);
+          } catch (error) {
+            err = error;
+          }
+          assert.ifError(err);
+          console.log('Cleared the database');
+          try {
+            await IDBExportImport.importFromJsonString(idbDB, mock2);
+          } catch (error) {
+            err = error;
+          }
+          assert.ifError(err);
+          console.log('Imported data successfully');
+          let jsonString;
+          try {
+            jsonString = await IDBExportImport.exportToJsonString(idbDB);
+          } catch (error) {
+            err = error;
+          }
+          assert.ifError(err);
+          console.log('Exported as JSON: ' + jsonString);
+          assert.equal(jsonString, '{"foo":[{"a":1723302865116,"id":1,' +
+                '"$types":{"a":"date"}}],"test":[{"foo":"value"}]}');
+          resolve();
+        });
     });
   });
-  it('Should not error if no object stores exist', async function() {
+  it('Should not error if no object stores exist', async function () {
     const idbDB = fakeIndexedDB; // get native IDBDatabase object from Dexie wrapper
     let err;
     try {
@@ -390,7 +389,7 @@ describe('IDBExportImport', function() {
     console.log('Exported as JSON: ' + jsonString);
     assert.equal(jsonString, '{}');
   });
-  it('Should not error if objectStoreNames undefined', async function() {
+  it('Should not error if objectStoreNames undefined', async function () {
     const idbDB = fakeIndexedDB; // get native IDBDatabase object from Dexie wrapper
     idbDB.objectStoreNames = undefined;
     let err;
