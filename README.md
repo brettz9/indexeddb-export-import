@@ -28,48 +28,50 @@ You will need an open [IDBDatabase](https://developer.mozilla.org/en-US/docs/Web
 The following example exports a database, clears all object stores, then re-imports the database. It uses [Dexie.js](https://github.com/dfahlander/Dexie.js) to initiate the database, but this is not required.
 
 ```js
-    import Dexie from 'dexie';
-    import * as IDBExportImport from 'idb-export-import';
+import Dexie from 'dexie';
+import * as IDBExportImport from 'idb-export-import';
 
-    const db = new Dexie('MyDB');
-    db.version(1).stores({
-      things: 'id++, thing_name, thing_description',
-    });
+const db = new Dexie('MyDB');
+db.version(1).stores({
+  things: 'id++, thing_name, thing_description'
+});
 
+try {
+  await db.open();
+} catch (err) {
+  console.error('Could not connect. ' + err);
+  process.exit(1);
+}
+
+// get native IDBDatabase object from Dexie wrapper
+const idbDatabase = db.backendDB();
+
+// export to JSON, clear database, and import from JSON
+let err;
+let jsonString;
+try {
+  jsonString = await IDBExportImport.exportToJsonString(idbDatabase);
+} catch (error) {
+  err = error;
+}
+if (err) {
+  console.error(err);
+} else {
+  console.log('Exported as JSON: ' + jsonString);
+
+  try {
+    await IDBExportImport.clearDatabase(idbDatabase);
+  } catch (error) {
+    err = error;
+  }
+  if (!err) { // cleared data successfully
     try {
-      await db.open();
-    } catch (err) {
-      console.error('Could not connect. ' + e);
-      return;
+      await IDBExportImport.importFromJsonString(idbDatabase, jsonString);
+      console.log('Imported data successfully');
+    } catch {
     }
-
-    const idbDatabase = db.backendDB(); // get native IDBDatabase object from Dexie wrapper
-
-    // export to JSON, clear database, and import from JSON
-    let err;
-    try {
-      jsonString = await IDBExportImport.exportToJsonString(idbDatabase);
-    } catch (error) {
-      err = error;
-    }
-    if (err) {
-      console.error(err);
-    } else {
-      console.log('Exported as JSON: ' + jsonString);
-      let err;
-      try {
-        await IDBExportImport.clearDatabase(idbDatabase);
-      } catch (error) {
-        err = error;
-      }
-      if (!err) { // cleared data successfully
-        try {
-          await IDBExportImport.importFromJsonString(idbDatabase, jsonString);
-          console.log('Imported data successfully');
-        } catch (err) {
-        }
-      }
-    }
+  }
+}
 ```
 
 ## API

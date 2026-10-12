@@ -26,9 +26,13 @@ async function exportToJsonString (idbDatabase) {
       'readonly'
     );
 
-    transaction.onerror = /* c8 ignore next -- Simulating? */ (
-      event
-    ) => reject(event);
+    transaction.addEventListener(
+      'error',
+      /* c8 ignore next 3 -- Simulating? */
+      (event) => {
+        reject(event);
+      }
+    );
 
     objectStoreNames.forEach((storeName) => {
       /** @type {unknown[]} */
@@ -55,8 +59,8 @@ async function exportToJsonString (idbDatabase) {
 }
 
 /**
- * Import data from JSON into an IndexedDB database. This does not delete any existing data
- *  from the database, so keys could clash.
+ * Import data from JSON into an IndexedDB database. This does not delete
+ *   any existing data from the database, so keys could clash.
  *
  * Only object stores that already exist will be imported.
  *
@@ -79,7 +83,13 @@ async function importFromJsonString (idbDatabase, jsonString) {
       'readwrite'
     );
 
-    transaction.onerror = /* c8 ignore next */ (event) => reject(event);
+    transaction.addEventListener(
+      'error',
+      /* c8 ignore next 3 -- Simulating? */
+      (event) => {
+        reject(event);
+      }
+    );
 
     const importObject = JSON.parse(jsonString);
 
@@ -96,12 +106,14 @@ async function importFromJsonString (idbDatabase, jsonString) {
       return;
     }
 
+    // eslint-disable-next-line @stylistic/max-len -- Long
+    // eslint-disable-next-line unicorn/no-unused-builtin-method-return -- Convenient
     objectStoreNames.some((storeName) => {
       let count = 0;
 
-      const aux = [...importObject[storeName] || /* c8 ignore next */ []];
+      const aux = [...importObject[storeName] || []];
 
-      if (importObject[storeName] && aux.length > 0) {
+      if (Object.hasOwn(importObject, storeName) && aux.length > 0) {
         aux.forEach((toAdd) => {
           const typesonAdd = typeson.revive(toAdd);
           const request = transaction.objectStore(storeName).add(typesonAdd);
@@ -119,12 +131,16 @@ async function importFromJsonString (idbDatabase, jsonString) {
             }
           };
 
-          request.onerror = /* c8 ignore next */ (event) => {
-            /* c8 ignore next */
-            console.log(event);
-          };
+          request.addEventListener(
+            'error',
+            /* c8 ignore next 4 -- Simulating */
+            (event) => {
+              // eslint-disable-next-line no-console -- Debugging
+              console.log(event);
+            }
+          );
         });
-      } else if (importObject[storeName]) {
+      } else if (Object.hasOwn(importObject, storeName)) {
         delete importObject[storeName];
         if (Object.keys(importObject).length === 0) {
           // added all object stores
@@ -132,6 +148,8 @@ async function importFromJsonString (idbDatabase, jsonString) {
           return true;
         }
       }
+
+      return false;
     });
   });
 }
@@ -158,7 +176,13 @@ async function clearDatabase (idbDatabase) {
       objectStoreNames,
       'readwrite'
     );
-    transaction.onerror = /* c8 ignore next */ (event) => reject(event);
+    transaction.addEventListener(
+      'error',
+      /* c8 ignore next 3 -- Simulating? */
+      (event) => {
+        reject(event);
+      }
+    );
 
     let count = 0;
     objectStoreNames.forEach(function (storeName) {
