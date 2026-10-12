@@ -12,7 +12,7 @@
     "attw": "attw --pack . --profile esm-only node16",
     "tsc": "tsc",
     "tsc-prod": "tsc -p tsconfig-prod.json",
-    "build": "rollup -c && echo '{\"type\": \"commonjs\"}' > dist/package.json && pnpm tsc-prod",
+    "build": "pnpm tsc-prod",
     "test": "c8 mocha",
     "lint": "eslint . --ext .js"
   },
