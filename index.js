@@ -9,6 +9,7 @@ const typeson = new Typeson().register(structuredCloningThrowing);
  * @param {IDBDatabase} idbDatabase - to export from
  */
 async function exportToJsonString(idbDatabase) {
+  /** @type {Record<string, unknown[]>} */
   const exportObject = {};
   const objectStoreNamesSet = new Set(idbDatabase.objectStoreNames);
   const size = objectStoreNamesSet.size;
@@ -26,9 +27,12 @@ async function exportToJsonString(idbDatabase) {
     transaction.onerror = /* c8 ignore next */ (event) => reject(event);
 
     objectStoreNames.forEach((storeName) => {
+      /** @type {unknown[]} */
       const allObjects = [];
       transaction.objectStore(storeName).openCursor().onsuccess = (event) => {
-        const cursor = event.target.result;
+        const cursor = /** @type {IDBCursorWithValue|null} */ (
+          event.target && 'result' in event.target && event.target.result
+        );
         if (cursor) {
           allObjects.push(typeson.encapsulate(cursor.value));
           cursor.continue();

@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "types": [],
+    "target": "es2024"
+  },
+  "include": ["index.js"],
+  "exclude": ["node_modules"]
+}

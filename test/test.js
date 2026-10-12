@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
-import {readFile} from 'fs/promises';
+import assert from 'node:assert';
+import {readFile} from 'node:fs/promises';
 import fakeIndexedDB from 'fake-indexeddb';
 import Dexie from 'dexie';
 import * as IDBExportImport from '../index.js';
-import assert from 'assert';
 
 const mock = await readFile('./test/data/example.json', 'utf8');
 const mock2 = await readFile('./test/data/example2.json', 'utf8');
