@@ -131,7 +131,9 @@ describe('IDBExportImport', function () {
     console.log('Cleared the database');
 
     try {
-      await IDBExportImport.importFromJsonString(idbDB, jsonString);
+      await IDBExportImport.importFromJsonString(
+        idbDB, /** @type {string} */ (jsonString)
+      );
     } catch (error) {
       err = error;
     }

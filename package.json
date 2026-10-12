@@ -1,6 +1,6 @@
 {
   "name": "idb-export-import",
-  "version": "2.1.5",
+  "version": "3.0.0",
   "description": "Export/import an IndexedDB database to/from Typeson JSON",
   "type": "module",
   "exports": {
